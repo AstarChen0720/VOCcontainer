@@ -4,28 +4,169 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        background-color: #eee;
+      }
+
+      .shadow {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2),
+          0 6px 20px 0 rgba(0, 0, 0, 0.19);
+      }
+
+      /* *{
+        border: 1px solid black;
+      } */
+
+      .flex {
+        display: flex;
+      }
+      .basic-background {
+        background-color: white;
+      }
+      .flex1 {
+        flex: 1;
+      }
+      .column {
+        flex-direction: column;
+      }
+
+      .margin-10 {
+        margin: 10px;
+      }
+
+      .margin-top-10 {
+        margin-top: 10px;
+      }
+
+      .margin-right-10 {
+        margin-right: 10px;
+      }
+      .index-item {
+        padding: 10px 20px; 
+        border-bottom: 1px solid rgb(190, 190, 190);
+        font-size: 20px;
+        color: #333;
+        cursor: pointer;
+      }
+      /*當螢幕寬度小於600px時要改變的css  */
+      @media (max-width: 600px) {
+        .index-item{
+          display: none;
+        }
+      }
+    </style>
   </head>
-  <body>
-    <img src="涼宮春日.jpg" alt="涼宮春日" />
-    <p>我對普通的人類沒有興趣</p>
-    <p>假如你們當中如果有</p>
-    <p>外星人,未來人,異世界人或超能力者的話</p>
-    <p>儘管來找我吧!!</p>
-    <p>
-      布局类html标签就是一些自带默认样式的东西而已,ex可以自訂一個標籤叫做&lt;star&gt;他有著h1的css,這樣他的行為就會跟h1一模一樣
-    </p>
-    <star
-      style="
-        display: block;
-        font-size: 2em;
-        margin-block-start: 0.67em;
-        margin-block-end: 0.67em;
-        margin-inline-start: 0px;
-        margin-inline-end: 0px;
-        font-weight: bold;
-        unicode-bidi: isolate;
-      "
-      >這樣他就會跟h1行為一模一樣
-    </star>
+  <body class="flex">
+    <!-- 第一層左側邊選單 -->
+    <div
+      style="width: 200px; z-index: 2"
+      class="basic-background shadow margin-10"
+    >
+      <!-- 用戶圖標欄 -->
+      <div style="justify-content: space-around; align-items: center ;padding : 10px; ; border-bottom: 2px solid #eee" class="flex">
+        <img
+          src="涼宮春日.jpg"
+          alt=""
+          style="width: 40px; height: 40px; overflow: hidden"
+        />
+        <div>涼宮春日</div>
+      </div>
+
+      <!-- 目錄項目 -->
+      <div class="flex1">
+        <div class="index-item">索引</div>
+        <div class="index-item">索引</div>
+        <div class="index-item">索引</div>
+        <div class="index-item">索引</div>
+        <div class="index-item">索引</div>
+      </div>
+    </div>
+    <!-- 第一層右主要區域 -->
+    <div class="flex1 flex column">
+      <!-- 第二層上頭部欄 -->
+      <div
+        style="height: 60px; z-index: 1"
+        class="basic-background shadow margin-10"
+      ></div>
+      <!-- 第二層下內容區 -->
+      <div style="overflow: auto" class="flex1 flex">
+        <!-- 第三層左邊區域 -->
+        <div style="flex: 3" class="flex column">
+          <!-- 第四層上數據區 -->
+          <div class="flex">
+            <!-- 數據block -->
+            <div
+              style="height: 100px"
+              class="flex1 basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 100px"
+              class="flex1 basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 100px"
+              class="flex1 basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 100px"
+              class="flex1 basic-background shadow margin-10"
+            ></div>
+          </div>
+          <!-- 第四層下列表區 -->
+          <div class="flex column">
+            <!-- 列表項目 -->
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+            <div
+              style="height: 160px"
+              class="basic-background shadow margin-10"
+            ></div>
+          </div>
+        </div>
+        <!-- 第三層右邊區域 -->
+        <div style="flex: 1" class="flex column margin-right-10 margin-top-10">
+          <!-- 第四層上提示區 -->
+          <div style="height: 150px" class="basic-background shadow"></div>
+          <!-- 第四層下訊息區 -->
+          <div
+            style="height: 300px"
+            class="basic-background shadow margin-top-10"
+          ></div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
