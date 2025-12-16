@@ -232,3 +232,10 @@ React 文件、TS 文件、Supabase 教學：
 ### import-export rule
 https://www.casper.tw/development/2020/03/25/import-export/
 
+
+## React基本概念:基本上React就是只在做這些事
+  1. 資料(數據):就是像是單字本身,文字....
+  2. 狀態:這東西正在被選中?還是正在透明狀態
+  3. 動作:他東西正在做什麼?在變色還是變大縮小?或是傳送東西?
+  4. 外觀:這資料所呈現的外觀
+基本上React就是控制這四件事而已
