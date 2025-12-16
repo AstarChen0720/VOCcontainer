@@ -9,14 +9,14 @@ type Word = {
 
 function App() {
   // 左邊的單字清單（暫時寫死）
-  // 建立一個
+  // 建立一個陣列放有哪些單字，裡面放Ｗord,初始值是符合Word的陣列（括號裡面的陣列，而每一個陣列是一個物件）
   const [words] = useState<Word[]>([
     { id: 1, text: 'apple' },
     { id: 2, text: 'banana' },
     { id: 3, text: 'cat' },
   ])
 
-  // 目前被選到的單字
+  // 建立一個陣列放目前選到的單字，目前被選到的單字，預設是null如果有選到就更新並且套用Word型別
   const [selectedWord, setSelectedWord] = useState<Word | null>(null)
 
   return (
