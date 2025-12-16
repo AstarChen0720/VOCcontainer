@@ -21,7 +21,7 @@ function App() {
 
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
-      {/* 左側：單字卡 */}
+      {/* 左側：單字卡 ，建立一個清單,每個list item是一個單字卡,每個單字卡顯示內容是每個word裡面的字,在點擊後他會去呼叫setSelectedWord去把SelectedWord變成是當前點擊的字 */}
       <div style={{ flex: 1, borderRight: '1px solid #ccc', padding: '16px' }}>
         <h2>單字卡</h2>
 
@@ -38,7 +38,7 @@ function App() {
         </ul>
       </div>
 
-      {/* 右側：字典 */}
+      {/* 右側：字典 用三元運算符判斷，讀取SelectedWord並顯示出來,如果沒有資料,就顯示"請點選左邊的單字" */}
       <div style={{ flex: 1, padding: '16px' }}>
         <h2>字典</h2>
 
@@ -54,5 +54,7 @@ function App() {
     </div>
   )
 }
-
+// 把App這個jsx推送到default頻道,main.jsx會統一渲染並執行程式
 export default App
+
+
