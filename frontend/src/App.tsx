@@ -4,6 +4,7 @@
 import { useState } from "react";
 import WordList from "./components/WordList";
 import Dictionary from "./components/Dictionary";
+import WordInput from "./components/WordInput";
 
 // 用type定義名叫Word的預設樣式,必須要是物件,且裡面有兩個屬性id(數字)和text(字串)
 type Word = {
@@ -11,7 +12,6 @@ type Word = {
   text: string;
 };
 
-  
 function App() {
   // 左邊的單字清單（暫時寫死））
   // 建立一個陣列放有哪些單字，裡面放words(左邊[]裡面的words是單純的名子,參數名),初始值是要符合Word的陣列(<Word[]>）
@@ -24,10 +24,24 @@ function App() {
   // 建立一個陣列放目前選到的單字，目前被選到的單字，預設是null如果有選到就更新並且套用Word型別
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
 
+  const addWord = (text: string) => {
+    const newWord: Word = {
+      id: Date.now(),
+      text,
+    };
+
+    setWords((prev) => [...prev, newWord]);
+  };
+
   // 在網頁中顯示一個div,放的兩個components:WordList 和Dictionary 並啟動,並且分別指定word和selected和Wordselected函式(props)傳給他們給他們讓可以使用(不然他們不能用)
   return (
     <div style={{ display: "flex", height: "100vh" }}>
-      <WordList words={words} onSelect={setSelectedWord} />
+      <div
+        style={{ flex: 1, borderRight: "1px solid #ccc", padding: "16px" }}
+      >
+        <WordInput onAdd={addWord} />
+        <WordList words={words} onSelect={setSelectedWord} />
+      </div>
       <Dictionary word={selectedWord} />
     </div>
   );
