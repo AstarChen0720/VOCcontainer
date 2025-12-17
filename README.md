@@ -4,7 +4,6 @@
 - 建立個人單字卡
 - 點擊單字顯示字典
 - 可看到別人對單字的註解
-
 有哪些畫面？
 - 左側：單字卡
 - 右側：單字詳細資訊 + 塗鴉牆
@@ -239,3 +238,18 @@ https://www.casper.tw/development/2020/03/25/import-export/
   3. 動作:他東西正在做什麼?在變色還是變大縮小?或是傳送東西?
   4. 外觀:這資料所呈現的外觀
 基本上React就是控制這四件事而已
+
+{}代表告訴React,我要用javascript指令了,不是要轉成html喔，記得要用javascript的方法來執行我喔
+
+在jsx中style被規定要是javascript的物件
+
+js參數中{}是解構語法代表要從參數內找到對應名稱的值
+ex:function Dictionary({ word }) {} ,在傳進來的參數內找到word的名稱的值,並把他叫做word
+  如果沒有加上{}則只是單純的把傳進來的參數命名而已
+  ex:function Dictionary() {} ,把所有傳進來的參數叫做word
+
+typescript規定型別有兩種
+  1. 一般規範形式 :type
+  2. 泛型 <代號> 
+   都可以自定義,但是如果用泛型則多一功能就是可以自動看你輸入什麼型別就輸出什麼型別(所以叫"泛"型),且規定輸入和輸出時不用分開寫可以寫在一起
+   https://gemini.google.com/share/01928a5936a0

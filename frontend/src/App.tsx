@@ -14,7 +14,7 @@ type Word = {
   
 function App() {
   // 左邊的單字清單（暫時寫死））
-  // 建立一個陣列放有哪些單字，裡面放words([]裡面的words是單純的名子,參數名),初始值是符合Word的陣列（括號裡面的陣列，而每一個陣列是一個物件）
+  // 建立一個陣列放有哪些單字，裡面放words(左邊[]裡面的words是單純的名子,參數名),初始值是要符合Word的陣列(<Word[]>）
   const [words] = useState<Word[]>([
     { id: 1, text: "apple" },
     { id: 2, text: "banana" },
