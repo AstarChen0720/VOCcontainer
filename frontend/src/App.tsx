@@ -1,6 +1,7 @@
 // 從react導入名叫useState的函式(具名匯入),
 // 從components/WordList導入WordList的不具名(=預設=default)匯出的東西(不具名匯入),可以字定義名子(因為default輸出只會有一個,你只要指定要從哪裡提取電腦就知道了)
 // 從components/Dictionary導入Dictionary的不具名(=預設=default)匯出的東西(不具名匯入)
+// 從components/WordInput導入WordInput的不具名(=預設=default)匯出的東西(不具名匯入)
 import { useState } from "react";
 import WordList from "./components/WordList";
 import Dictionary from "./components/Dictionary";
@@ -14,8 +15,8 @@ type Word = {
 
 function App() {
   // 左邊的單字清單（暫時寫死））
-  // 建立一個陣列放有哪些單字，裡面放words(左邊[]裡面的words是單純的名子,參數名),初始值是要符合Word的陣列(<Word[]>）
-  const [words] = useState<Word[]>([
+  // <Word[]>代表初始值是要符合Word的陣列,()的內容是初始值
+  const [words, setWords] = useState<Word[]>([
     { id: 1, text: "apple" },
     { id: 2, text: "banana" },
     { id: 3, text: "cat" },
@@ -23,22 +24,20 @@ function App() {
 
   // 建立一個陣列放目前選到的單字，目前被選到的單字，預設是null如果有選到就更新並且套用Word型別
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
-
+  // 建立一個叫做addWord函式,他的參數限定是string,他的工作有兩個1.建立一個叫做nesWord的object,型別限定是word,格式是第一項id會用Date.now()產生一個從1970/1/1到現在的豪秒數當id(目的是給一個獨一無二的數,方便排序)第二項是傳入的參數
   const addWord = (text: string) => {
     const newWord: Word = {
       id: Date.now(),
       text,
     };
-
+    //調用setWrods函式,然後他預設如果括號內是函數就會將最新的狀態(words陣列)傳入第一個參數,而這函數是一個簡寫的函數,功能是立刻回傳一個新的陣列,而這新的陣列就是在目前最新的陣列最後加上newWord這個元素
     setWords((prev) => [...prev, newWord]);
   };
 
   // 在網頁中顯示一個div,放的兩個components:WordList 和Dictionary 並啟動,並且分別指定word和selected和Wordselected函式(props)傳給他們給他們讓可以使用(不然他們不能用)
   return (
     <div style={{ display: "flex", height: "100vh" }}>
-      <div
-        style={{ flex: 1, borderRight: "1px solid #ccc", padding: "16px" }}
-      >
+      <div style={{ flex: 1, borderRight: "1px solid #ccc", padding: "16px" }}>
         <WordInput onAdd={addWord} />
         <WordList words={words} onSelect={setSelectedWord} />
       </div>

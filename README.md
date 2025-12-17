@@ -253,3 +253,14 @@ typescript規定型別有兩種
   2. 泛型 <代號> 
    都可以自定義,但是如果用泛型則多一功能就是可以自動看你輸入什麼型別就輸出什麼型別(所以叫"泛"型),且規定輸入和輸出時不用分開寫可以寫在一起
    https://gemini.google.com/share/01928a5936a0
+
+useState是一個有兩個元素的陣列,元素一是初始值=右邊()內的東西,元素二是一個函數setWords,調用他後他會把他的參數變成兩元素陣列的元素一
+ex:[words,setWords]假設現在words=3
+setWords(5)後,words=5
+
+... 是展開運算子 (Spread Operator),功能是將目前的東西"倒"出來(會自動偵測如果是陣列就倒成陣列,object就object)
+
+test=[apple,banana]
+ex:test2=[...test,cat],test2會變成:[apple,banana,cat]
+
+trim()是一個字串可以用的函式,功能是會一次剪掉這個字串的前後的所有空格(空白鍵,tsb,...)然後立刻回傳修剪後的字串
