@@ -18,19 +18,19 @@ const STORAGE_KEY = "words";
 function App() {
   // 左邊的單字清單
   // <Word[]>代表初始值是要符合Word的陣列,()的內容是初始值
-  const [words, setWords] = useState<Word[]>([]);
+  const [words, setWords] = useState<Word[]>(() =>{
+      // 從localStorage找到名叫STORAGE_KEY的值並存入常數stored,只會執行一次
+      const stored = localStorage.getItem(STORAGE_KEY);
+      // 如果stored有東西，就用它當初始值；沒有的話，就用空陣列 []
+      return stored ? JSON.parse(stored) : [];
+    });
+
+
   // 建立一個陣列放目前選到的單字，目前被選到的單字，預設是null如果有選到就更新並且套用Word型別
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);    
 
-  // 用useEffect,執行一個函式,只在第一次render後執行一次(因為依賴項是空陣列[]),他的功能是創造一個叫stored的函式,存入從localStorage取出(.getItem)名叫STORAGE_KEY的東西,如果有(不是null),就用setWords將他用JSON.parse轉成陣列後更新成當前的單字陣列(words),不用return因為他不會持續執行
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setWords(JSON.parse(stored));
-    }
-  }, []);
 
-  // 用useEffect,執行一個函式,每次單字陣列(words)改變後執行,功能是將目前的單字list(words)變成string(JSON.stringify)後存入localStorage中叫STORAGE_KEY的項目中(.setItem(key,value))
+  // 用useEffect,執行一個函式,每次單字陣列(words)改變後執行,功能是將當前的單字陣列(words)變成string(JSON.stringify)後存入localStorage中叫STORAGE_KEY的盒子中(.setItem(key,value))
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
   }, [words]);
