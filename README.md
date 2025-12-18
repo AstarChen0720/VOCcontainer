@@ -264,3 +264,37 @@ test=[apple,banana]
 ex:test2=[...test,cat],test2會變成:[apple,banana,cat]
 
 trim()是一個字串可以用的函式,功能是會一次剪掉這個字串的前後的所有空格(空白鍵,tsb,...)然後立刻回傳修剪後的字串
+
+
+useEffect的功能是在他的component(大的component跟他在裡面的位置無關)畫面渲染完後執行他裡面的函式(Effect代表side-effect,React把跟畫面渲染無關的東西叫做side-effect(副作用))
+
+這裡的return是Cleanup function,他會自動在這個useEffect要卸載或重新執行才會觸發的程式,有時如果要綁定監視器,則需要每次清理上一次的東西
+
+而後面的[]是依賴項列表,他的功能是他會自動比對他跟他上一次執行時的列表的東西有沒有一樣,如果一樣就不會再執行一次useEffect,沒寫就是每次都會執行
+  exuseEffect(() => {
+  console.log("test"),[list]);},這時只要list沒有變,他再被呼叫到時也不會在執行一次
+  useEffect(() => {
+    // 這裡是你想要執行的「副作用」程式碼
+    console.log("執行副作用！");
+
+    return () => {
+      // 這裡是用來「清理」的地方 (Cleanup function)
+    };
+  }, [依賴項列表]);
+
+
+localStorage是本地瀏覽器的"記事本",只能存string,
+如果存入陣列或object要先用SON.stringify(這裡放你要存入的東西)"壓扁"成string再存入
+  ex:陣列會變成這樣"[Apple,text,Banana]"
+而取出時可以用JSON.parse(這裡放要還原的東西)來還原成陣列或object    
+
+
+通常要寫再參數內的要執行的東西都要寫成函數,不可以直接寫
+  useEffect(
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(words)), 
+    [words]
+  );
+  要寫
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
+  }, [words]);
