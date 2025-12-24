@@ -18,17 +18,15 @@ const STORAGE_KEY = "words";
 function App() {
   // 左邊的單字清單
   // <Word[]>代表初始值是要符合Word的陣列,()的內容是初始值
-  const [words, setWords] = useState<Word[]>(() =>{
-      // 從localStorage找到名叫STORAGE_KEY的值並存入常數stored,只會執行一次
-      const stored = localStorage.getItem(STORAGE_KEY);
-      // 如果stored有東西，就用它當初始值；沒有的話，就用空陣列 []
-      return stored ? JSON.parse(stored) : [];
-    });
-
+  const [words, setWords] = useState<Word[]>(() => {
+    // 從localStorage找到名叫STORAGE_KEY的值並存入常數stored,只會執行一次
+    const stored = localStorage.getItem(STORAGE_KEY);
+    // 如果stored有東西，就用它當初始值；沒有的話，就用空陣列 []
+    return stored ? JSON.parse(stored) : [];
+  });
 
   // 建立一個陣列放目前選到的單字，目前被選到的單字，預設是null如果有選到就更新並且套用Word型別
-  const [selectedWord, setSelectedWord] = useState<Word | null>(null);    
-
+  const [selectedWord, setSelectedWord] = useState<Word | null>(null);
 
   // 用useEffect,執行一個函式,每次單字陣列(words)改變後執行,功能是將當前的單字陣列(words)變成string(JSON.stringify)後存入localStorage中叫STORAGE_KEY的盒子中(.setItem(key,value))
   useEffect(() => {
@@ -41,8 +39,13 @@ function App() {
       id: Date.now(),
       text,
     };
-    //調用setWrods函式,然後他預設如果括號內是函數就會將最新的狀態(words陣列)傳入第一個參數,而這函數是一個簡寫的函數,功能是立刻回傳一個新的陣列,而這新的陣列就是在目前最新的陣列最後加上newWord這個元素
+    //調用setWords函式,然後他預設如果括號內是函數就會將最新的狀態(words陣列)傳入第一個參數,而這函數是一個簡寫的函數,功能是立刻回傳一個新的陣列,而這新的陣列就是在目前最新的陣列最後加上newWord這個元素
     setWords((prev) => [...prev, newWord]);
+  };
+
+  // 建立一個叫做deleteWord的函式,他的參數限定是number,功能是回傳一個新的陣列,而這新的陣列是將目前的words陣列去掉id等於參數的那個元素後的陣列
+  const deleteWord = (id: number) => {
+    setWords((prev) => prev.filter((word) => word.id !== id));
   };
 
   // 在網頁中顯示一個div,放的兩個components:WordList 和Dictionary 並啟動,並且分別指定word和selected和Wordselected函式(props)傳給他們給他們讓可以使用(不然他們不能用)
@@ -50,7 +53,11 @@ function App() {
     <div style={{ display: "flex", height: "100vh" }}>
       <div style={{ flex: 1, borderRight: "1px solid #ccc", padding: "16px" }}>
         <WordInput onAdd={addWord} />
-        <WordList words={words} onSelect={setSelectedWord} />
+        <WordList
+          words={words}
+          onSelect={setSelectedWord}
+          onDelete={deleteWord}
+        />
       </div>
       <Dictionary word={selectedWord} />
     </div>

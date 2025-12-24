@@ -298,3 +298,9 @@ localStorage是本地瀏覽器的"記事本",只能存string,
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
   }, [words]);
+
+
+陣列.filter( (他便歷到的資料) => 判斷條件 )
+  filter會自動便歷陣列中的每一項,然後根據判斷條件,有符合就留下不符合就丟掉,最後輸出所有符合條件的項目輸出一個新陣列
+
+.stopPropagation意思是停止傳播,如果這個按鈕下面還有東西就可以避免點到他
