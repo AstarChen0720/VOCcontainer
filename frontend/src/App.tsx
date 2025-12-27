@@ -6,59 +6,86 @@ import { useState, useEffect } from "react";
 import WordList from "./components/WordList";
 import Dictionary from "./components/Dictionary";
 import WordInput from "./components/WordInput";
+import { supabase } from "./supabaseClient";
 
 // 用type定義名叫Word的預設樣式,必須要是物件,且裡面有兩個屬性id(數字)和text(字串)
 type Word = {
   id: number;
   text: string;
 };
-//為管理方便,定義一個常數STORAGE_KEY,值是字串"words",用來當作localStorage的key值
-const STORAGE_KEY = "words";
 
 function App() {
   // 左邊的單字清單
-  // <Word[]>代表初始值是要符合Word的陣列,()的內容是初始值
-  const [words, setWords] = useState<Word[]>(() => {
-    // 從localStorage找到名叫STORAGE_KEY的值並存入常數stored,只會執行一次
-    const stored = localStorage.getItem(STORAGE_KEY);
-    // 如果stored有東西，就用它當初始值；沒有的話，就用空陣列 []
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [words, setWords] = useState<Word[]>([]);
 
   // 建立一個陣列放目前選到的單字，目前被選到的單字，預設是null如果有選到就更新並且套用Word型別
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
 
-  // 用useEffect,執行一個函式,每次單字陣列(words)改變後執行,功能是將當前的單字陣列(words)變成string(JSON.stringify)後存入localStorage中叫STORAGE_KEY的盒子中(.setItem(key,value))
+  // 初始載入：從 Supabase 的words欄位抓取全部資料並用id排序,然後放到words陣列中 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-  }, [words]);
+    const fetchWords = async () => {
+      const { data, error } = await supabase
+        .from("words")
+        .select("*")
+        .order("id", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching words:", error);
+      } else {
+        setWords(data || []);
+      }
+    };
+
+    fetchWords();
+  }, []);
 
   // 建立一個叫做addWord函式,他的參數限定是string
   // 功能：將傳入的字串依照空格、逗號或斜線分割成多個單字並加入清單
-  const addWord = (text: string) => {
-    // 使用正規表達式分割：\s 代表空格, / 代表斜線, , 代表逗號
-    // filter(Boolean) 用來移除分割後產生的空字串
+  const addWord = async (text: string) => {
     const wordTexts = text.split(/[\s,/]+/).filter(Boolean);
 
-    const newWords: Word[] = wordTexts.map((t, index) => ({
-      // 加上 index 確保同時新增多個單字時 ID 不會重複
-      id: Date.now() + index,
+    const newWordsData = wordTexts.map((t) => ({
       text: t,
     }));
 
-    // 將所有新單字一次加入陣列
-    setWords((prev) => [...prev, ...newWords]);
+    // 存入 Supabase並且自動同步最新的資料到前端
+    const { data, error } = await supabase
+      .from("words")
+      .insert(newWordsData)
+      .select();
+
+    if (error) {
+      console.error("Error adding words:", error);
+    } else if (data) {
+      setWords((prev) => [...prev, ...data]);
+    }
   };
 
-  // 建立一個叫做deleteWord的函式,他的參數限定是number,功能是回傳一個新的陣列,而這新的陣列是將目前的words陣列去掉id等於參數的那個元素後的陣列
-  const deleteWord = (id: number) => {
-    setWords((prev) => prev.filter((word) => word.id !== id));
+  // 建立一個叫做deleteWord的函式,他的功能是刪除指定id在supabase的單字,且同步刪除前端的單字
+  const deleteWord = async (id: number) => {
+    const { error } = await supabase.from("words").delete().eq("id", id);
+
+    if (error) {
+      console.error("Error deleting word:", error);
+    } else {
+      setWords((prev) => prev.filter((word) => word.id !== id));
+    }
   };
 
-  const updateWord = (id: number, newText: string) => {
-    setWords((prev) =>
-      prev.map((word) => (word.id === id ? { ...word, text: newText } : word))
-    );
+  // 建立一個叫做updateWord的函式,他的功能是更新指定id在supabase的單字,且同步更新前端的單字
+  const updateWord = async (id: number, newText: string) => {
+    const { error } = await supabase
+      .from("words")
+      .update({ text: newText })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error updating word:", error);
+    } else {
+      setWords((prev) =>
+        prev.map((word) => (word.id === id ? { ...word, text: newText } : word))
+      );
+    }
   };
 
   // 在網頁中顯示一個div,放的兩個components:WordList 和Dictionary 並啟動,並且分別指定word和selected和Wordselected函式(props)傳給他們給他們讓可以使用(不然他們不能用)
