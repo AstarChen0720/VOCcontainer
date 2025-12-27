@@ -9,12 +9,33 @@ type Props = {
   words: Word[];
   onSelect: (word: Word) => void;
   onDelete: (id: number) => void;
+  onUpdate: (id: number, newText: string) => void;
 };
 
 // 創一個叫WordList的函式,並且用解構寫法將words和onSelect和onDelete這三個屬性重參數中抓出來使用,且規定型別是Props
-function WordList({ words, onSelect, onDelete }: Props) {
+function WordList({ words, onSelect, onDelete, onUpdate }: Props) {
   // 用useState建立一個叫hoveredId的狀態,預設值是null,型別是number或null(代表目前沒有hover任何一個單字)
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editText, setEditText] = useState("");
+
+  // 開始編輯
+  const startEditing = (word: Word) => {
+    setEditingId(word.id);
+    setEditText(word.text);
+  };
+  // 儲存編輯
+  const saveEdit = () => {
+    if (editingId !== null && editText.trim() !== "") {
+      onUpdate(editingId, editText);
+    }
+    setEditingId(null);
+  };
+  // 取消編輯
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditText("");
+  };
 
   return (
     <div style={{ flex: 1, borderRight: "1px solid #ccc", padding: "16px" }}>
@@ -37,12 +58,43 @@ function WordList({ words, onSelect, onDelete }: Props) {
                 hoveredId === word.id ? "#f0f0f0" : "transparent",
             }}
             onClick={() => onSelect(word)}
-            onMouseEnter={() => setHoveredId(word.id)} 
+            onMouseEnter={() => setHoveredId(word.id)}
             onMouseLeave={() => setHoveredId(null)}
           >
-            <span>{word.text}</span>
-            {/* 刪除按鈕只在滑鼠移到該單字時顯示 */}
-            {hoveredId === word.id && (
+            {editingId === word.id ? (
+              <input
+                type="text"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                onBlur={saveEdit}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveEdit();
+                  if (e.key === "Escape") cancelEdit();
+                }}
+                autoFocus
+                style={{
+                  flex: 1,
+                  padding: "4px",
+                  fontSize: "16px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              // 如果不是編輯模式，雙擊就可以進入編輯模式
+              <span
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  startEditing(word);
+                }}
+                style={{ flex: 1 }}
+              >
+                {word.text}
+              </span>
+            )}
+            {/* 刪除按鈕只在滑鼠移到該單字時顯示，且不在編輯模式時顯示 */}
+            {hoveredId === word.id && editingId !== word.id && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

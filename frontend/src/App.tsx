@@ -48,6 +48,12 @@ function App() {
     setWords((prev) => prev.filter((word) => word.id !== id));
   };
 
+  const updateWord = (id: number, newText: string) => {
+    setWords((prev) =>
+      prev.map((word) => (word.id === id ? { ...word, text: newText } : word))
+    );
+  };
+
   // 在網頁中顯示一個div,放的兩個components:WordList 和Dictionary 並啟動,並且分別指定word和selected和Wordselected函式(props)傳給他們給他們讓可以使用(不然他們不能用)
   return (
     <div style={{ display: "flex", height: "100vh" }}>
@@ -57,6 +63,7 @@ function App() {
           words={words}
           onSelect={setSelectedWord}
           onDelete={deleteWord}
+          onUpdate={updateWord}
         />
       </div>
       <Dictionary word={selectedWord} />
