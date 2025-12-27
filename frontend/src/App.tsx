@@ -21,7 +21,7 @@ function App() {
   // 建立一個陣列放目前選到的單字，目前被選到的單字，預設是null如果有選到就更新並且套用Word型別
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
 
-  // 初始載入：從 Supabase 的words欄位抓取全部資料並用id排序,然後放到words陣列中 
+  // 初始載入：從 Supabase 的words欄位抓取全部資料並用id排序,然後放到words陣列中
   useEffect(() => {
     const fetchWords = async () => {
       const { data, error } = await supabase
