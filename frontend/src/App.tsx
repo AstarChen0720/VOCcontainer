@@ -33,14 +33,21 @@ function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
   }, [words]);
 
-  // 建立一個叫做addWord函式,他的參數限定是string,他的工作有兩個1.建立一個叫做nesWord的object,型別限定是word,格式是第一項id會用Date.now()產生一個從1970/1/1到現在的豪秒數當id(目的是給一個獨一無二的數,方便排序)第二項是傳入的參數
+  // 建立一個叫做addWord函式,他的參數限定是string
+  // 功能：將傳入的字串依照空格、逗號或斜線分割成多個單字並加入清單
   const addWord = (text: string) => {
-    const newWord: Word = {
-      id: Date.now(),
-      text,
-    };
-    //調用setWords函式,然後他預設如果括號內是函數就會將最新的狀態(words陣列)傳入第一個參數,而這函數是一個簡寫的函數,功能是立刻回傳一個新的陣列,而這新的陣列就是在目前最新的陣列最後加上newWord這個元素
-    setWords((prev) => [...prev, newWord]);
+    // 使用正規表達式分割：\s 代表空格, / 代表斜線, , 代表逗號
+    // filter(Boolean) 用來移除分割後產生的空字串
+    const wordTexts = text.split(/[\s,/]+/).filter(Boolean);
+
+    const newWords: Word[] = wordTexts.map((t, index) => ({
+      // 加上 index 確保同時新增多個單字時 ID 不會重複
+      id: Date.now() + index,
+      text: t,
+    }));
+
+    // 將所有新單字一次加入陣列
+    setWords((prev) => [...prev, ...newWords]);
   };
 
   // 建立一個叫做deleteWord的函式,他的參數限定是number,功能是回傳一個新的陣列,而這新的陣列是將目前的words陣列去掉id等於參數的那個元素後的陣列

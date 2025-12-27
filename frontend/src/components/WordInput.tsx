@@ -23,11 +23,15 @@ function WordInput({ onAdd }: Props) {
     <div style={{ marginBottom: "16px" }}>
       <input
         type="text"
-        placeholder="輸入單字"
+        placeholder="輸入單字 (可用空格、逗號或 / 分隔)"
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleSubmit();
+        }}
+        style={{ padding: "4px", width: "250px" }}
       />
-      <button onClick={handleSubmit} style={{ marginLeft: "8px" }}>
+      <button onClick={handleSubmit} style={{ marginLeft: "8px", padding: "4px 12px" }}>
         新增
       </button>
     </div>
