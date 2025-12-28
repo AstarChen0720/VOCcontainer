@@ -1,54 +1,70 @@
-// 從react導入名叫useState的函式(具名匯入),
-// 從components/WordList導入WordList的不具名(=預設=default)匯出的東西(不具名匯入),可以字定義名子(因為default輸出只會有一個,你只要指定要從哪裡提取電腦就知道了)
-// 從components/Dictionary導入Dictionary的不具名(=預設=default)匯出的東西(不具名匯入)
-// 從components/WordInput導入WordInput的不具名(=預設=default)匯出的東西(不具名匯入)
 import { useState, useEffect } from "react";
+import { Session } from "@supabase/supabase-js";
 import WordList from "./components/WordList";
 import Dictionary from "./components/Dictionary";
 import WordInput from "./components/WordInput";
+import Auth from "./components/Auth";
 import { supabase } from "./supabaseClient";
 
-// 用type定義名叫Word的預設樣式,必須要是物件,且裡面有兩個屬性id(數字)和text(字串)
 type Word = {
   id: number;
   text: string;
+  user_id?: string;
 };
 
 function App() {
-  // 左邊的單字清單
+  const [session, setSession] = useState<Session | null>(null);
   const [words, setWords] = useState<Word[]>([]);
-
-  // 建立一個陣列放目前選到的單字，目前被選到的單字，預設是null如果有選到就更新並且套用Word型別
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
 
-  // 初始載入：從 Supabase 的words欄位抓取全部資料並用id排序,然後放到words陣列中
+  // 監聽登入狀態
   useEffect(() => {
-    const fetchWords = async () => {
-      const { data, error } = await supabase
-        .from("words")
-        .select("*")
-        .order("id", { ascending: true });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-      if (error) {
-        console.error("Error fetching words:", error);
-      } else {
-        setWords(data || []);
-      }
-    };
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
-    fetchWords();
+    return () => subscription.unsubscribe();
   }, []);
 
-  // 建立一個叫做addWord函式,他的參數限定是string
-  // 功能：將傳入的字串依照空格、逗號或斜線分割成多個單字並加入清單
+  // 當 session 改變（例如登入後），抓取該使用者的單字
+  useEffect(() => {
+    if (session) {
+      fetchWords();
+    } else {
+      setWords([]); // 登出清空
+    }
+  }, [session]);
+
+  const fetchWords = async () => {
+    const { data, error } = await supabase
+      .from("words")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching words:", error);
+    } else {
+      setWords(data || []);
+    }
+  };
+
   const addWord = async (text: string) => {
+    if (!session) return; // 未登入不執行
+
     const wordTexts = text.split(/[\s,/]+/).filter(Boolean);
 
+    // 這裡很重要：加入 user_id
     const newWordsData = wordTexts.map((t) => ({
       text: t,
+      user_id: session.user.id,
     }));
 
-    // 存入 Supabase並且自動同步最新的資料到前端
     const { data, error } = await supabase
       .from("words")
       .insert(newWordsData)
@@ -56,12 +72,12 @@ function App() {
 
     if (error) {
       console.error("Error adding words:", error);
+      alert("新增失敗：" + error.message);
     } else if (data) {
       setWords((prev) => [...prev, ...data]);
     }
   };
 
-  // 建立一個叫做deleteWord的函式,他的功能是刪除指定id在supabase的單字,且同步刪除前端的單字
   const deleteWord = async (id: number) => {
     const { error } = await supabase.from("words").delete().eq("id", id);
 
@@ -69,10 +85,10 @@ function App() {
       console.error("Error deleting word:", error);
     } else {
       setWords((prev) => prev.filter((word) => word.id !== id));
+      if (selectedWord?.id === id) setSelectedWord(null);
     }
   };
 
-  // 建立一個叫做updateWord的函式,他的功能是更新指定id在supabase的單字,且同步更新前端的單字
   const updateWord = async (id: number, newText: string) => {
     const { error } = await supabase
       .from("words")
@@ -88,21 +104,56 @@ function App() {
     }
   };
 
-  // 在網頁中顯示一個div,放的兩個components:WordList 和Dictionary 並啟動,並且分別指定word和selected和Wordselected函式(props)傳給他們給他們讓可以使用(不然他們不能用)
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  if (!session) {
+    return <Auth />;
+  }
+
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <div style={{ flex: 1, borderRight: "1px solid #ccc", padding: "16px" }}>
-        <WordInput onAdd={addWord} />
-        <WordList
-          words={words}
-          onSelect={setSelectedWord}
-          onDelete={deleteWord}
-          onUpdate={updateWord}
-        />
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* Header with Logout */}
+      <div
+        style={{
+          padding: "10px",
+          borderBottom: "1px solid #ccc",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span>Welcome, {session.user.email}</span>
+        <button
+          onClick={handleLogout}
+          style={{ padding: "5px 10px", cursor: "pointer" }}
+        >
+          登出
+        </button>
       </div>
-      <Dictionary word={selectedWord} />
+
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        <div
+          style={{
+            flex: 1,
+            borderRight: "1px solid #ccc",
+            padding: "16px",
+            overflowY: "auto",
+          }}
+        >
+          <WordInput onAdd={addWord} />
+          <WordList
+            words={words}
+            onSelect={setSelectedWord}
+            onDelete={deleteWord}
+            onUpdate={updateWord}
+          />
+        </div>
+        <Dictionary word={selectedWord} />
+      </div>
     </div>
   );
 }
-//把App這個components 不具名(=預設=default)匯出,讓其他組件可以使用
+
 export default App;
