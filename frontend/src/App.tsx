@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Session } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 import WordList from "./components/WordList";
 import Dictionary from "./components/Dictionary";
 import WordInput from "./components/WordInput";
@@ -21,12 +21,14 @@ function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (!session) setWords([]);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (!session) setWords([]);
     });
 
     return () => subscription.unsubscribe();
@@ -34,25 +36,23 @@ function App() {
 
   // 當 session 改變（例如登入後），抓取該使用者的單字
   useEffect(() => {
+    const fetchWords = async () => {
+      const { data, error } = await supabase
+        .from("words")
+        .select("*")
+        .order("id", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching words:", error);
+      } else {
+        setWords(data || []);
+      }
+    };
+
     if (session) {
       fetchWords();
-    } else {
-      setWords([]); // 登出清空
     }
   }, [session]);
-
-  const fetchWords = async () => {
-    const { data, error } = await supabase
-      .from("words")
-      .select("*")
-      .order("id", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching words:", error);
-    } else {
-      setWords(data || []);
-    }
-  };
 
   const addWord = async (text: string) => {
     if (!session) return; // 未登入不執行

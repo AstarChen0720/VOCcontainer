@@ -1,33 +1,233 @@
-// 用type定義名叫Word的預設樣式,必須要是物件,且裡面有兩個屬性id(數字)和text(字串)
+import { useState, useEffect } from "react";
+
 type Word = {
   id: number;
   text: string;
 };
-// 定義名叫Props的型別,裡面有一個屬性word,word(注意大小寫)的型別規定是Word或是null
+
 type Props = {
   word: Word | null;
 };
 
-// 這裡代表我要創建一個名叫Dictionary的函式,使用傳入的函數中word的參數，且規定型別是Props.而參數的{word}是解構寫法(簡寫法),代表直接從傳來的參數裡面取出word這個屬性來使用(跟上面沒有關係),而": Props"是typescript限定型別(格式)的語法,代表這個參數的型別限定要符合Props
+// Free Dictionary API 的回傳格式定義
+type DictionaryEntry = {
+  word: string;
+  phonetic?: string;
+  phonetics: {
+    text?: string;
+    audio?: string;
+  }[];
+  meanings: {
+    partOfSpeech: string;
+    definitions: {
+      definition: string;
+      example?: string;
+    }[];
+  }[];
+};
+
 function Dictionary({ word }: Props) {
+  const [entry, setEntry] = useState<DictionaryEntry | null>(null);
+  const [translation, setTranslation] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!word) {
+      setEntry(null);
+      setTranslation("");
+      return;
+    }
+
+    const fetchData = async () => {
+      setLoading(true);
+      setError("");
+      setEntry(null);
+      setTranslation("");
+
+      try {
+        // 1. 查詢英文定義、發音、例句 (Free Dictionary API)
+        const dictRes = await fetch(
+          `https://api.dictionaryapi.dev/api/v2/entries/en/${word.text}`
+        );
+
+        if (dictRes.ok) {
+          const data = await dictRes.json();
+          if (data.length > 0) {
+            setEntry(data[0]);
+          }
+        } else if (dictRes.status === 404) {
+          // 查無此字
+          setError("查無此字的英文定義");
+        }
+
+        // 2. 查詢中文翻譯 (MyMemory API - 免費版有額度限制，但練習用足夠)
+        // langpair=en|zh-TW 代表從英文翻成繁體中文
+        const transRes = await fetch(
+          `https://api.mymemory.translated.net/get?q=${word.text}&langpair=en|zh-TW`
+        );
+
+        if (transRes.ok) {
+          const data = await transRes.json();
+          if (data.responseData) {
+            setTranslation(data.responseData.translatedText);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching dictionary data:", err);
+        setError("查詢發生錯誤，請檢查網路連線");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [word]); // 當 word 改變時重新執行
+
+  // 播放發音的函式
+  const playAudio = (audioUrl?: string) => {
+    if (audioUrl) {
+      new Audio(audioUrl).play();
+    }
+  };
+
+  if (!word) {
+    return (
+      <div
+        style={{
+          flex: 1,
+          padding: "16px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          color: "#888",
+        }}
+      >
+        <p>請點選左邊的單字以查看詳情</p>
+      </div>
+    );
+  }
+
   return (
-    // {}代表告訴React,我要用javascript指令了,不是要轉成html喔，記得要用javascript的方法來執行我喔,且在jsx中style被規定要是javascript的物件
-    // 所以才要用雙大括號{{}}:外層的大括號是告訴React我要用javascript,內層的大括號是代表這是一個javascript的物件
-    <div style={{ flex: 1, padding: "16px" }}>
-      <h2>字典</h2>
-      {/*三元運算式,代表有沒有選到單字,有選到就顯示單字word的內容(word=true),沒選到就顯示請選單字(word=false)
-      
-      這裡也一樣因為這三元運算子是javascript所以外面也要用{}包起來 */}
-      {word ? (
-        <div>
-          <h3>{word.text}</h3>
-          <p>這裡之後會顯示字典內容</p>
-        </div>
-      ) : (
-        <p>請點選左邊的單字</p>
+    <div
+      style={{
+        flex: 1,
+        padding: "24px",
+        overflowY: "auto",
+        backgroundColor: "#f9f9f9",
+      }}
+    >
+      {loading && <p>查詢中...</p>}
+
+      {!loading && (
+        <>
+          <div
+            style={{
+              borderBottom: "1px solid #ddd",
+              paddingBottom: "16px",
+              marginBottom: "16px",
+            }}
+          >
+            <h1
+              style={{ margin: "0 0 8px 0", fontSize: "2.5rem", color: "#333" }}
+            >
+              {word.text}
+            </h1>
+
+            {/* 音標與發音按鈕 */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              {entry?.phonetic && (
+                <span
+                  style={{
+                    fontFamily: "monospace",
+                    fontSize: "1.2rem",
+                    color: "#666",
+                  }}
+                >
+                  {entry.phonetic}
+                </span>
+              )}
+
+              {/* 尋找第一個有音檔的 phonetic */}
+              {entry?.phonetics.find((p) => p.audio)?.audio && (
+                <button
+                  onClick={() =>
+                    playAudio(entry.phonetics.find((p) => p.audio)?.audio)
+                  }
+                  style={{
+                    cursor: "pointer",
+                    background: "none",
+                    border: "1px solid #ccc",
+                    borderRadius: "50%",
+                    width: "32px",
+                    height: "32px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  title="播放發音"
+                >
+                  🔊
+                </button>
+              )}
+            </div>
+
+            {/* 中文翻譯 */}
+            {translation && (
+              <div
+                style={{
+                  marginTop: "12px",
+                  fontSize: "1.5rem",
+                  color: "#0056b3",
+                  fontWeight: "bold",
+                }}
+              >
+                {translation}
+              </div>
+            )}
+          </div>
+
+          {error && <p style={{ color: "red" }}>{error}</p>}
+
+          {/* 英文定義與例句 */}
+          {entry?.meanings.map((meaning, index) => (
+            <div key={index} style={{ marginBottom: "24px" }}>
+              <h3
+                style={{
+                  fontStyle: "italic",
+                  color: "#555",
+                  borderLeft: "4px solid #0056b3",
+                  paddingLeft: "8px",
+                }}
+              >
+                {meaning.partOfSpeech}
+              </h3>
+              <ul style={{ paddingLeft: "20px" }}>
+                {meaning.definitions.map((def, idx) => (
+                  <li key={idx} style={{ marginBottom: "12px" }}>
+                    <div style={{ fontSize: "1.1rem", lineHeight: "1.5" }}>
+                      {def.definition}
+                    </div>
+                    {def.example && (
+                      <div
+                        style={{
+                          color: "#666",
+                          marginTop: "4px",
+                          fontSize: "0.95rem",
+                        }}
+                      >
+                        Example: "{def.example}"
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </>
       )}
     </div>
   );
 }
-// 把Dictionary這個components 不具名(=預設=default)匯出,讓其他組件可以使用
+
 export default Dictionary;
